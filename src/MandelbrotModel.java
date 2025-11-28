@@ -17,12 +17,12 @@ import javax.swing.SwingWorker;
 /**
  * Model responsible for managing Mandelbrot parameters, rendering, and history.
  * <p>
- * 这是 MVC 中的 Model：
+ * As the MVC model it:
  * <ul>
- *   <li>维护复平面边界、最大迭代次数、配色方案等状态；</li>
- *   <li>用 {@link MandelbrotCalculator} 计算迭代矩阵，并用 {@link ColorScheme} 着色生成 {@link BufferedImage}；</li>
- *   <li>通过 {@link PropertyChangeSupport} 通知视图刷新；</li>
- *   <li>使用栈结构记录历史，支持撤销/重做。</li>
+ *   <li>Maintains complex-plane bounds, max iterations, colour scheme, and overlay settings;</li>
+ *   <li>Uses {@link MandelbrotCalculator} to compute iteration grids and {@link ColorScheme} to colourize them into a {@link BufferedImage};</li>
+ *   <li>Notifies listeners through {@link PropertyChangeSupport};</li>
+ *   <li>Records parameter history on stacks for undo/redo.</li>
  * </ul>
  */
 public class MandelbrotModel {
@@ -51,7 +51,7 @@ public class MandelbrotModel {
     private SwingWorker<BufferedImage, Void> currentWorker;
 
     /**
-     * 初始化模型并立即触发首次渲染。
+     * Initialize the model and trigger the first render immediately.
      */
     public MandelbrotModel() {
         render();
@@ -70,7 +70,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 估算当前缩放倍率，用于叠加显示（与初始范围比较）。
+     * Estimate the current zoom factor for overlay display (compared to the initial bounds).
      */
     public double getZoomFactor() {
         double startingRange = MandelbrotCalculator.INITIAL_MAX_REAL - MandelbrotCalculator.INITIAL_MIN_REAL;
@@ -98,7 +98,7 @@ public class MandelbrotModel {
         return colorScheme;
     }
 
-    /** 切换配色方案。 */
+    /** Switch the colour scheme. */
     public void setColorScheme(ColorScheme colorScheme) {
         Objects.requireNonNull(colorScheme);
         if (this.colorScheme != colorScheme) {
@@ -110,7 +110,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 设置迭代上限，过小值被忽略以避免计算异常。
+     * Set the iteration cap; very small values are ignored to prevent unstable output.
      */
     public void setMaxIterations(int maxIterations) {
         if (maxIterations < 10) {
@@ -125,7 +125,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 当画布尺寸变化时更新渲染分辨率。
+     * Update render resolution when the canvas size changes.
      */
     public void setRenderSize(int width, int height) {
         if (width <= 0 || height <= 0) {
@@ -136,7 +136,7 @@ public class MandelbrotModel {
         render();
     }
 
-    /** 将所有参数恢复到初始默认值。 */
+    /** Restore all parameters to their initial defaults. */
     public void reset() {
         saveState();
         boolean previousOverlay = showZoomFactor;
@@ -149,14 +149,14 @@ public class MandelbrotModel {
         colorScheme = ColorScheme.GRAYSCALE;
         redoStack.clear();
         render();
-        // 如果之前勾选了缩放倍率叠加，复位后仍保持显示
+        // Preserve the zoom-factor overlay after reset if it was enabled before
         if (previousOverlay) {
             changeSupport.firePropertyChange("overlay", false, true);
         }
     }
 
     /**
-     * 将屏幕坐标选框转换为新的复平面边界，并触发重新渲染。
+     * Convert a screen-space selection rectangle into new complex-plane bounds and render.
      */
     public void zoomToArea(int startX, int startY, int endX, int endY, int panelWidth, int panelHeight) {
         if (panelWidth <= 0 || panelHeight <= 0) {
@@ -189,7 +189,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 按当前视窗宽高的一定比例进行平移。
+     * Pan by a fraction of the current viewport width/height.
      */
     public void panByFraction(double fractionX, double fractionY) {
         saveState();
@@ -204,7 +204,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 按鼠标拖拽的像素位移进行平移，使得拖拽起点在释放时移动到拖拽终点。
+     * Pan based on mouse drag pixel deltas so the drag start moves to the drag end when released.
      */
     public void panByPixels(int deltaX, int deltaY, int panelWidth, int panelHeight) {
         if (panelWidth <= 0 || panelHeight <= 0 || (deltaX == 0 && deltaY == 0)) {
@@ -223,7 +223,7 @@ public class MandelbrotModel {
         render();
     }
 
-    /** 撤销最近一次参数修改。 */
+    /** Undo the most recent parameter change. */
     public void undo() {
         if (undoStack.isEmpty()) {
             return;
@@ -235,7 +235,7 @@ public class MandelbrotModel {
         render();
     }
 
-    /** 重做最近一次被撤销的操作。 */
+    /** Redo the most recently undone operation. */
     public void redo() {
         if (redoStack.isEmpty()) {
             return;
@@ -248,7 +248,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 将当前参数写入 Properties 文件，便于下次加载。
+     * Write current parameters to a Properties file for later loading.
      */
     public void saveParameters(File file) throws IOException {
         Properties properties = new Properties();
@@ -266,7 +266,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 从 Properties 文件读取参数，若颜色枚举名称不匹配则回退到默认灰度。
+     * Load parameters from a Properties file; if the colour scheme name is unknown, fall back to grayscale.
      */
     public void loadParameters(File file) throws IOException {
         Properties properties = new Properties();
@@ -291,7 +291,7 @@ public class MandelbrotModel {
         render();
     }
 
-    /** 将当前渲染结果写出为 PNG。 */
+    /** Export the current render as a PNG file. */
     public void exportImage(File file) throws IOException {
         if (image != null) {
             ImageIO.write(image, "png", file);
@@ -299,8 +299,8 @@ public class MandelbrotModel {
     }
 
     /**
-     * 异步渲染当前参数对应的分形图像。
-     * 使用 {@link SwingWorker} 避免阻塞 EDT，完成后触发 "image" 属性事件以刷新视图。
+     * Render the fractal for current parameters asynchronously.
+     * Uses {@link SwingWorker} to avoid blocking the EDT and fires an "image" property event on completion.
      */
     private void render() {
         if (currentWorker != null && !currentWorker.isDone()) {
@@ -346,13 +346,13 @@ public class MandelbrotModel {
         currentWorker.execute();
     }
 
-    /** 捕获当前参数的不可变快照，供历史栈使用。 */
+    /** Capture an immutable snapshot of current parameters for the history stacks. */
     private Parameters snapshot() {
         return new Parameters(minReal, maxReal, minImaginary, maxImaginary, maxIterations, radiusSquared, showZoomFactor,
                 colorScheme);
     }
 
-    /** 将某个参数快照应用回当前模型。 */
+    /** Apply a parameter snapshot back onto the current model. */
     private void apply(Parameters parameters) {
         minReal = parameters.minReal();
         maxReal = parameters.maxReal();
@@ -365,7 +365,7 @@ public class MandelbrotModel {
     }
 
     /**
-     * 在修改前保存当前状态到撤销栈，限制栈深度防止无限增长。
+     * Save current state to the undo stack before a change, trimming depth to avoid unbounded growth.
      */
     private void saveState() {
         undoStack.push(snapshot());

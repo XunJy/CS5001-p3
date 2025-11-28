@@ -23,11 +23,11 @@ import javax.swing.SwingUtilities;
 /**
  * Entry point and controller wiring for the Mandelbrot explorer GUI.
  * <p>
- * 作为整个应用的启动类：
+ * Responsibilities:
  * <ul>
- *   <li>创建模型与画布，并将它们放入窗口；</li>
- *   <li>搭建侧边栏控件，把按钮和输入框事件转交给模型；</li>
- *   <li>提供保存/加载/导出等文件对话框操作。</li>
+ *   <li>Create the model and canvas and place them in the window;</li>
+ *   <li>Assemble the side-panel controls and pass button/text inputs to the model;</li>
+ *   <li>Host file dialogs for save/load/export actions.</li>
  * </ul>
  */
 public class MandelbrotExplorer extends JFrame {
@@ -36,7 +36,7 @@ public class MandelbrotExplorer extends JFrame {
     private final MandelbrotPanel panel;
 
     /**
-     * 初始化窗口、模型与控件布局。
+     * Initialize the window, model, and control layout.
      */
     public MandelbrotExplorer() {
         super("Mandelbrot Explorer");
@@ -52,7 +52,7 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
-     * 构建右侧控制面板，提供迭代次数、配色、缩放显示、平移与历史操作按钮。
+     * Build the right-hand control panel with iteration, palette, overlay, pan, and history actions.
      */
     private JPanel buildControlPanel() {
         JPanel container = new JPanel(new GridBagLayout());
@@ -68,8 +68,7 @@ public class MandelbrotExplorer extends JFrame {
         container.add(iterationLabel, gbc);
 
         gbc.gridy++;
-        // 迭代次数通过 JSpinner 设置，避免用户输入非数字
-        // 使用 JSpinner 输入，点击 Apply 按钮后再提交值，避免误触发计算
+        // JSpinner prevents non-numeric input; Apply commits the value to avoid accidental recomputes
         JPanel iterationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         JSpinner iterationSpinner = new JSpinner(new SpinnerNumberModel(MandelbrotCalculator.INITIAL_MAX_ITERATIONS, 10, 2000, 10));
         JButton applyIterations = new JButton("Apply");
@@ -133,7 +132,7 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
-     * 构建平移按钮区，将文本框中的比例转为横纵偏移。
+     * Build the pan button grid, turning the text field fraction into x/y offsets.
      */
     private JPanel buildPanButtons(JTextField panField) {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -166,7 +165,7 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
-     * 从文本框读取平移比例并调用模型平移。
+     * Parse the pan fraction from the text field and call the model to pan.
      */
     private void panFromField(JTextField panField, int directionX, int directionY) {
         try {
@@ -178,7 +177,7 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
-     * 通过文件对话框保存当前参数到 Properties 文件。
+     * Save current parameters to a Properties file via a file chooser.
      */
     private void saveParameters() {
         JFileChooser chooser = new JFileChooser();
@@ -193,7 +192,7 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
-     * 通过文件对话框加载参数并刷新视图。
+     * Load parameters via a file chooser and refresh the view.
      */
     private void loadParameters() {
         JFileChooser chooser = new JFileChooser();
@@ -208,7 +207,7 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
-     * 导出当前渲染结果为 PNG 文件。
+     * Export the current render to a PNG file.
      */
     private void exportImage() {
         JFileChooser chooser = new JFileChooser();
@@ -227,7 +226,7 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
-     * 程序入口，确保在 EDT 创建并显示窗口。
+     * Program entry point; ensure the window is created on the EDT.
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

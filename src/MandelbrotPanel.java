@@ -18,14 +18,14 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
- * Panel that displays the Mandelbrot image and supports drag-to-zoom interactions.
+ * Panel that displays the Mandelbrot image and supports drag interactions.
  * <p>
- * 作为 View 层，负责两件事：
+ * As the view layer it is responsible for:
  * <ul>
- *   <li>根据模型提供的 {@link BufferedImage} 绘制当前分形；</li>
- *   <li>捕获鼠标拖拽，画出半透明选框并把框选坐标转换成模型的复平面范围。</li>
+ *   <li>Painting the current fractal from the model-provided {@link BufferedImage};</li>
+ *   <li>Capturing mouse drags, drawing a translucent zoom rectangle, and converting drag coordinates to complex-plane bounds.</li>
  * </ul>
- * 通过实现 {@link PropertyChangeListener}，当模型触发 "image" 或 "overlay" 事件时自动重绘。
+ * By implementing {@link PropertyChangeListener}, it repaints automatically when the model fires "image" or "overlay" events.
  */
 public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
 
@@ -37,7 +37,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
     private boolean panning;
 
     /**
-     * 构造函数，注册监听器并初始化拖拽逻辑。
+     * Wires listeners and initial drag state for the panel.
      */
     public MandelbrotPanel(MandelbrotModel model) {
         this.model = model;
@@ -48,7 +48,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                // 右键（或按住中键）拖拽表示平移；左键拖拽仍然用于缩放
+                // Right or middle button drags indicate panning; left drag stays for zooming
                 dragButton = e.getButton();
                 panning = SwingUtilities.isRightMouseButton(e) || SwingUtilities.isMiddleMouseButton(e);
                 dragStart = e.getPoint();
@@ -60,12 +60,12 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
             public void mouseReleased(MouseEvent e) {
                 if (dragStart != null && dragEnd != null) {
                     if (panning) {
-                        // 拖拽平移：将鼠标位移转换为复平面偏移量
+                        // Pan: convert mouse displacement into complex-plane shift
                         int deltaX = dragEnd.x - dragStart.x;
                         int deltaY = dragEnd.y - dragStart.y;
                         model.panByPixels(deltaX, deltaY, getWidth(), getHeight());
                     } else {
-                        // 将屏幕选框转换为复平面边界，委托给模型完成计算
+                        // Convert the screen rectangle to complex-plane bounds and delegate to the model
                         model.zoomToArea(dragStart.x, dragStart.y, dragEnd.x, dragEnd.y, getWidth(), getHeight());
                     }
                 }
@@ -79,9 +79,9 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                // 更新选框终点，重绘半透明矩形，提供即时反馈而不触发重新计算
+                // Update the drag endpoint, repaint the translucent rectangle, and avoid triggering computation mid-drag
                 dragEnd = e.getPoint();
-                // 拖拽过程中如果是右键/中键，确保保持平移模式，避免选框覆盖
+                // Keep panning mode during right/middle-button drags to avoid drawing a zoom rectangle
                 if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != 0
                         || (e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0
                         || dragButton == MouseEvent.BUTTON3 || dragButton == MouseEvent.BUTTON2) {
@@ -94,7 +94,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                // 画布尺寸变化后，让模型在新分辨率下重新计算图像
+                // When the panel resizes, ask the model to render at the new resolution
                 model.setRenderSize(getWidth(), getHeight());
             }
         });
@@ -110,7 +110,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
                 int offsetX = dragEnd.x - dragStart.x;
                 int offsetY = dragEnd.y - dragStart.y;
                 g2d.drawImage(image, offsetX, offsetY, getWidth(), getHeight(), null);
-                // 填补被平移后露出的空白区域，避免残影
+                // Fill empty areas revealed by the translated preview to avoid artifacts
                 g2d.setColor(getBackground());
                 if (offsetX > 0) {
                     g2d.fillRect(0, 0, offsetX, getHeight());

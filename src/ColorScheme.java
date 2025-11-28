@@ -3,10 +3,11 @@ import java.awt.Color;
 /**
  * Enumeration of color schemes for mapping iteration counts to colours.
  * <p>
- * 迭代次数越大表示逃逸越慢，这里将数值映射成渐变色，方便学生尝试不同视觉风格。
+ * Higher iteration counts mean slower escape; the values are mapped to gradients so students can experiment with different
+ * visual styles.
  */
 public enum ColorScheme {
-    /** 简单灰度，迭代越多越亮，极限值为黑色表示属于集合。 */
+    /** Simple grayscale: higher iterations appear brighter; points inside the set are black. */
     GRAYSCALE {
         @Override
         public Color map(int iteration, int maxIterations) {
@@ -17,7 +18,7 @@ public enum ColorScheme {
             return new Color(value, value, value);
         }
     },
-    /** 蓝色渐变，突出边缘轮廓。 */
+    /** Blue gradient to emphasize edges. */
     BLUE_GRADIENT {
         @Override
         public Color map(int iteration, int maxIterations) {
@@ -28,7 +29,7 @@ public enum ColorScheme {
             return new Color(0, ratio, 1.0f).brighter();
         }
     },
-    /** 火焰渐变，利用红-黄-白的层次强调逃逸速度。 */
+    /** Fire gradient using red-yellow-white to highlight escape speed. */
     FIRE {
         @Override
         public Color map(int iteration, int maxIterations) {
@@ -41,11 +42,11 @@ public enum ColorScheme {
     };
 
     /**
-     * 将某个点的迭代次数转为颜色。
+     * Convert the iteration count for a point into a colour.
      *
-     * @param iteration 当前点的迭代次数
-     * @param maxIterations 迭代上限（用于归一化）
-     * @return 映射后的颜色
+     * @param iteration iteration count for the point
+     * @param maxIterations iteration limit (used for normalization)
+     * @return mapped colour
      */
     public abstract Color map(int iteration, int maxIterations);
 }
