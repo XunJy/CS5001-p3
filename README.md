@@ -52,7 +52,7 @@ The program follows a lightweight MVC-style separation:
 - **Show zoom factor:** When enabled, the panel overlays the current zoom level computed by comparing the initial real-axis span to the active span. The overlay state survives resets if it was previously on.
 
 ## Enhancements implemented
-- **Multiple colour maps:** The `ColorScheme` enum maps iteration counts to grayscale, blue, or fire gradients. Switching palettes triggers a re-render so colours update consistently.
+- **Multiple colour maps:** The `ColorScheme` enum maps iteration counts to grayscale, blue-to-white, red-to-white, or fire gradients. Palette toggle buttons on the control panel trigger a re-render so colours update consistently.
 - **Parameter save/load:** Model methods serialize bounds, iterations, radius, overlay flag, and palette to a properties file and restore them later, making exploration resumable.
 - **PNG export:** The current rendered `BufferedImage` can be written to disk via `ImageIO`, preserving the on-screen view.
 - **Extended undo/redo/reset:** History covers zoom, pan, palette, iteration limit, overlay toggle, and load operations; reset restores all defaults while respecting an active overlay toggle.

@@ -9,13 +9,14 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
+import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -81,9 +82,7 @@ public class MandelbrotExplorer extends JFrame {
         container.add(new JLabel("Colour scheme:"), gbc);
 
         gbc.gridy++;
-        JComboBox<ColorScheme> schemeBox = new JComboBox<>(ColorScheme.values());
-        schemeBox.addActionListener(e -> model.setColorScheme((ColorScheme) schemeBox.getSelectedItem()));
-        container.add(schemeBox, gbc);
+        container.add(buildColorButtons(), gbc);
 
         gbc.gridy++;
         JCheckBox zoomFactorBox = new JCheckBox("Show zoom factor");
@@ -132,6 +131,24 @@ public class MandelbrotExplorer extends JFrame {
     }
 
     /**
+     * Build toggle buttons so users can switch colour maps with a single click.
+     */
+    private JPanel buildColorButtons() {
+        JPanel colorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ButtonGroup group = new ButtonGroup();
+        for (ColorScheme scheme : ColorScheme.values()) {
+            JToggleButton button = new JToggleButton(prettyName(scheme));
+            if (scheme == model.getColorScheme()) {
+                button.setSelected(true);
+            }
+            button.addActionListener(e -> model.setColorScheme(scheme));
+            group.add(button);
+            colorPanel.add(button);
+        }
+        return colorPanel;
+    }
+
+    /**
      * Build the pan button grid, turning the text field fraction into x/y offsets.
      */
     private JPanel buildPanButtons(JTextField panField) {
@@ -162,6 +179,21 @@ public class MandelbrotExplorer extends JFrame {
         panel.add(down, gbc);
 
         return panel;
+    }
+
+    private String prettyName(ColorScheme scheme) {
+        switch (scheme) {
+            case GRAYSCALE:
+                return "Grayscale";
+            case BLUE_GRADIENT:
+                return "Blue";
+            case RED_GRADIENT:
+                return "Red";
+            case FIRE:
+                return "Fire";
+            default:
+                return scheme.name();
+        }
     }
 
     /**
