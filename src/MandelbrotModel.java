@@ -139,16 +139,20 @@ public class MandelbrotModel {
     /** 将所有参数恢复到初始默认值。 */
     public void reset() {
         saveState();
+        boolean previousOverlay = showZoomFactor;
         minReal = MandelbrotCalculator.INITIAL_MIN_REAL;
         maxReal = MandelbrotCalculator.INITIAL_MAX_REAL;
         minImaginary = MandelbrotCalculator.INITIAL_MIN_IMAGINARY;
         maxImaginary = MandelbrotCalculator.INITIAL_MAX_IMAGINARY;
         maxIterations = MandelbrotCalculator.INITIAL_MAX_ITERATIONS;
         radiusSquared = MandelbrotCalculator.DEFAULT_RADIUS_SQUARED;
-        showZoomFactor = false;
         colorScheme = ColorScheme.GRAYSCALE;
         redoStack.clear();
         render();
+        // 如果之前勾选了缩放倍率叠加，复位后仍保持显示
+        if (previousOverlay) {
+            changeSupport.firePropertyChange("overlay", false, true);
+        }
     }
 
     /**

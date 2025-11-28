@@ -32,6 +32,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
     private final MandelbrotModel model;
     private Point dragStart;
     private Point dragEnd;
+    private int dragButton = MouseEvent.NOBUTTON;
     private BufferedImage image;
     private boolean panning;
 
@@ -48,6 +49,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
             @Override
             public void mousePressed(MouseEvent e) {
                 // 右键（或按住中键）拖拽表示平移；左键拖拽仍然用于缩放
+                dragButton = e.getButton();
                 panning = SwingUtilities.isRightMouseButton(e) || SwingUtilities.isMiddleMouseButton(e);
                 dragStart = e.getPoint();
                 dragEnd = e.getPoint();
@@ -69,6 +71,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
                 }
                 dragStart = null;
                 dragEnd = null;
+                dragButton = MouseEvent.NOBUTTON;
                 panning = false;
                 repaint();
             }
@@ -78,6 +81,12 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
             public void mouseDragged(MouseEvent e) {
                 // 更新选框终点，重绘半透明矩形，提供即时反馈而不触发重新计算
                 dragEnd = e.getPoint();
+                // 拖拽过程中如果是右键/中键，确保保持平移模式，避免选框覆盖
+                if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != 0
+                        || (e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0
+                        || dragButton == MouseEvent.BUTTON3 || dragButton == MouseEvent.BUTTON2) {
+                    panning = true;
+                }
                 repaint();
             }
         });
@@ -97,7 +106,25 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (image != null) {
-            g2d.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+            if (panning && dragStart != null && dragEnd != null) {
+                int offsetX = dragEnd.x - dragStart.x;
+                int offsetY = dragEnd.y - dragStart.y;
+                g2d.drawImage(image, offsetX, offsetY, getWidth(), getHeight(), null);
+                // 填补被平移后露出的空白区域，避免残影
+                g2d.setColor(getBackground());
+                if (offsetX > 0) {
+                    g2d.fillRect(0, 0, offsetX, getHeight());
+                } else if (offsetX < 0) {
+                    g2d.fillRect(getWidth() + offsetX, 0, -offsetX, getHeight());
+                }
+                if (offsetY > 0) {
+                    g2d.fillRect(0, 0, getWidth(), offsetY);
+                } else if (offsetY < 0) {
+                    g2d.fillRect(0, getHeight() + offsetY, getWidth(), -offsetY);
+                }
+            } else {
+                g2d.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+            }
         }
         if (dragStart != null && dragEnd != null && !panning) {
             g2d.setColor(new Color(255, 255, 255, 128));
