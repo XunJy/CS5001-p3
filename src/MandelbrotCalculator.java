@@ -29,6 +29,8 @@ either expressed or implied, of the FreeBSD Project.
 
 /**
  * The MandelbrotCalculator class contains methods which establish the Mandelbrot set.
+ * This class stays pure computation with no Swing dependency so the model can reuse its constants (initial bounds, iteration
+ * limits, radius) and calculation methods.
  * The calcMandelbrotSet method below iterates over X,Y positions and establishes for specified parameter values a 2-D array containing
  * for each [y][x] pixel an iteration value that may be mapped to colour and used to visualise the Mandelbrot set.
  * The calcMandelbrotSet method iteratively calls for each X,Y coordinate, the calcMandel method (also included here) which establishes the iteration value for a particular X,Y coordinate.
