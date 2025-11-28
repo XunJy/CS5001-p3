@@ -199,6 +199,26 @@ public class MandelbrotModel {
         render();
     }
 
+    /**
+     * 按鼠标拖拽的像素位移进行平移，使得拖拽起点在释放时移动到拖拽终点。
+     */
+    public void panByPixels(int deltaX, int deltaY, int panelWidth, int panelHeight) {
+        if (panelWidth <= 0 || panelHeight <= 0 || (deltaX == 0 && deltaY == 0)) {
+            return;
+        }
+        saveState();
+        redoStack.clear();
+        double realPerPixel = (maxReal - minReal) / panelWidth;
+        double imagPerPixel = (maxImaginary - minImaginary) / panelHeight;
+        double realShift = -deltaX * realPerPixel;
+        double imagShift = -deltaY * imagPerPixel;
+        minReal += realShift;
+        maxReal += realShift;
+        minImaginary += imagShift;
+        maxImaginary += imagShift;
+        render();
+    }
+
     /** 撤销最近一次参数修改。 */
     public void undo() {
         if (undoStack.isEmpty()) {

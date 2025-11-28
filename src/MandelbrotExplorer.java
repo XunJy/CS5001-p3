@@ -69,9 +69,14 @@ public class MandelbrotExplorer extends JFrame {
 
         gbc.gridy++;
         // 迭代次数通过 JSpinner 设置，避免用户输入非数字
+        // 使用 JSpinner 输入，点击 Apply 按钮后再提交值，避免误触发计算
+        JPanel iterationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         JSpinner iterationSpinner = new JSpinner(new SpinnerNumberModel(MandelbrotCalculator.INITIAL_MAX_ITERATIONS, 10, 2000, 10));
-        iterationSpinner.addChangeListener(e -> model.setMaxIterations((Integer) iterationSpinner.getValue()));
-        container.add(iterationSpinner, gbc);
+        JButton applyIterations = new JButton("Apply");
+        applyIterations.addActionListener(e -> model.setMaxIterations((Integer) iterationSpinner.getValue()));
+        iterationPanel.add(iterationSpinner);
+        iterationPanel.add(applyIterations);
+        container.add(iterationPanel, gbc);
 
         gbc.gridy++;
         container.add(new JLabel("Colour scheme:"), gbc);

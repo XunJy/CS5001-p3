@@ -15,6 +15,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  * Panel that displays the Mandelbrot image and supports drag-to-zoom interactions.
@@ -32,6 +33,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
     private Point dragStart;
     private Point dragEnd;
     private BufferedImage image;
+    private boolean panning;
 
     /**
      * 构造函数，注册监听器并初始化拖拽逻辑。
@@ -45,7 +47,8 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                // 记录拖拽起点并立刻绘制初始选框
+                // 右键（或按住中键）拖拽表示平移；左键拖拽仍然用于缩放
+                panning = SwingUtilities.isRightMouseButton(e) || SwingUtilities.isMiddleMouseButton(e);
                 dragStart = e.getPoint();
                 dragEnd = e.getPoint();
                 repaint();
@@ -54,11 +57,19 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (dragStart != null && dragEnd != null) {
-                    // 将屏幕选框转换为复平面边界，委托给模型完成计算
-                    model.zoomToArea(dragStart.x, dragStart.y, dragEnd.x, dragEnd.y, getWidth(), getHeight());
+                    if (panning) {
+                        // 拖拽平移：将鼠标位移转换为复平面偏移量
+                        int deltaX = dragEnd.x - dragStart.x;
+                        int deltaY = dragEnd.y - dragStart.y;
+                        model.panByPixels(deltaX, deltaY, getWidth(), getHeight());
+                    } else {
+                        // 将屏幕选框转换为复平面边界，委托给模型完成计算
+                        model.zoomToArea(dragStart.x, dragStart.y, dragEnd.x, dragEnd.y, getWidth(), getHeight());
+                    }
                 }
                 dragStart = null;
                 dragEnd = null;
+                panning = false;
                 repaint();
             }
         });
@@ -88,7 +99,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         if (image != null) {
             g2d.drawImage(image, 0, 0, getWidth(), getHeight(), null);
         }
-        if (dragStart != null && dragEnd != null) {
+        if (dragStart != null && dragEnd != null && !panning) {
             g2d.setColor(new Color(255, 255, 255, 128));
             int x = Math.min(dragStart.x, dragEnd.x);
             int y = Math.min(dragStart.y, dragEnd.y);

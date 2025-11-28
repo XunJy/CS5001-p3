@@ -1,6 +1,6 @@
 # CS5001-p3 Mandelbrot Explorer
 
-本项目提供一个基于 Swing 的曼德博集合探索器，支持拖拽缩放、平移、配色切换、撤销/重做以及参数保存/加载和图像导出等功能。
+本项目提供一个基于 Swing 的曼德博集合探索器，支持拖拽缩放、鼠标拖动平移、配色切换、撤销/重做以及参数保存/加载和图像导出等功能。
 
 ## 设计思路
 - **分层结构（近似 MVC）**：
@@ -9,14 +9,14 @@
   - **Controller/Delegate（`MandelbrotExplorer`）** 构建 Swing 控件（按钮、文本框、下拉框等），把用户操作转化为对模型的调用。
   - **核心算法（`MandelbrotCalculator`）** 提供纯计算方法，返回迭代次数矩阵，方便在模型中用不同配色方案上色。
   - **颜色映射（`ColorScheme`）** 定义枚举以映射迭代值到不同渐变色，便于一键切换。
-- **事件驱动**：模型通过 `PropertyChangeSupport` 通知视图刷新；视图在鼠标拖拽时即时绘制半透明选框避免重复计算；界面使用 `SwingUtilities.invokeLater` 保证在 EDT 创建窗口。
+- **事件驱动**：模型通过 `PropertyChangeSupport` 通知视图刷新；视图在鼠标拖拽时即时绘制半透明选框避免重复计算，左键拖拽缩放、右键拖拽平移；界面使用 `SwingUtilities.invokeLater` 保证在 EDT 创建窗口。
 - **状态管理**：使用 `Deque` 记录参数快照以实现撤销/重做，并在修改参数前保存旧状态，保持操作可恢复。
 - **文件交互**：使用 `Properties` 保存/加载参数，用 `ImageIO` 导出 PNG；`JFileChooser` 提供简单的文件选择界面。
 
 ## 各文件作用
 - `src/MandelbrotCalculator.java`：纯计算类，给定分辨率与复平面边界返回迭代次数矩阵，内含基础参数常量。
 - `src/MandelbrotModel.java`：模型层，封装渲染参数、异步渲染任务、历史记录、保存/加载与导出。
-- `src/MandelbrotPanel.java`：绘制层，展示 `BufferedImage`，处理鼠标拖拽缩放与组件缩放事件。
+- `src/MandelbrotPanel.java`：绘制层，展示 `BufferedImage`，处理左键拖拽缩放、右键拖拽平移与组件缩放事件。
 - `src/MandelbrotExplorer.java`：启动与控制层，搭建 Swing 窗口和侧边栏控件，调用模型完成缩放、平移、撤销/重做、重置、保存/加载和导出。
 - `src/ColorScheme.java`：颜色枚举，提供灰度、蓝色渐变、火焰风格三种映射。
 
@@ -39,7 +39,7 @@
    java -cp src MandelbrotExplorer
    ```
 
-首次启动会显示默认视角。使用鼠标拖拽在画布上选取区域可放大，侧边栏可调整迭代次数、颜色映射，执行平移、撤销/重做、重置视角，以及保存/加载参数或导出 PNG 图像。
+首次启动会显示默认视角。使用鼠标左键拖拽在画布上选取区域可放大，右键或中键拖拽可平移。侧边栏使用 "Max iterations" 的 Apply 按钮提交新的迭代次数，另外可切换颜色映射、执行撤销/重做/重置视角，以及保存/加载参数或导出 PNG 图像。
 
 ## 常见问题
 - 若启动时报找不到类或方法，确认已在项目根目录执行编译命令，并使用 `-cp src` 作为类路径。
