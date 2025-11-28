@@ -18,6 +18,13 @@ import javax.swing.JPanel;
 
 /**
  * Panel that displays the Mandelbrot image and supports drag-to-zoom interactions.
+ * <p>
+ * 作为 View 层，负责两件事：
+ * <ul>
+ *   <li>根据模型提供的 {@link BufferedImage} 绘制当前分形；</li>
+ *   <li>捕获鼠标拖拽，画出半透明选框并把框选坐标转换成模型的复平面范围。</li>
+ * </ul>
+ * 通过实现 {@link PropertyChangeListener}，当模型触发 "image" 或 "overlay" 事件时自动重绘。
  */
 public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
 
@@ -26,6 +33,9 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
     private Point dragEnd;
     private BufferedImage image;
 
+    /**
+     * 构造函数，注册监听器并初始化拖拽逻辑。
+     */
     public MandelbrotPanel(MandelbrotModel model) {
         this.model = model;
         setPreferredSize(new Dimension(MandelbrotModel.DEFAULT_WIDTH, MandelbrotModel.DEFAULT_HEIGHT));
@@ -35,6 +45,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                // 记录拖拽起点并立刻绘制初始选框
                 dragStart = e.getPoint();
                 dragEnd = e.getPoint();
                 repaint();
@@ -43,6 +54,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (dragStart != null && dragEnd != null) {
+                    // 将屏幕选框转换为复平面边界，委托给模型完成计算
                     model.zoomToArea(dragStart.x, dragStart.y, dragEnd.x, dragEnd.y, getWidth(), getHeight());
                 }
                 dragStart = null;
@@ -53,6 +65,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
+                // 更新选框终点，重绘半透明矩形，提供即时反馈而不触发重新计算
                 dragEnd = e.getPoint();
                 repaint();
             }
@@ -61,6 +74,7 @@ public class MandelbrotPanel extends JPanel implements PropertyChangeListener {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+                // 画布尺寸变化后，让模型在新分辨率下重新计算图像
                 model.setRenderSize(getWidth(), getHeight());
             }
         });
